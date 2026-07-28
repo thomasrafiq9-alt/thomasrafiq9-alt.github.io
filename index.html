@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rafiq Thomas — Administrateur Systèmes &amp; Réseaux</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#0A1520;
+  --bg-deep:#060D15;
+  --panel:#0F1E2C;
+  --panel-2:#132535;
+  --line:#1D3446;
+  --line-soft:#152A3A;
+  --ink:#DCE7EF;
+  --ink-dim:#6F8AA0;
+  --ink-dimmer:#4D6479;
+  --cyan:#48D8C7;
+  --cyan-dim:#2B6D66;
+  --amber:#FFB454;
+  --red:#E85B5B;
+  --radius:3px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0/100% 28px,
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0/28px 100%,
+    var(--bg);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:'IBM Plex Sans',sans-serif;
+  line-height:1.6;
+}
+
+/* ---------- patch-panel rail ---------- */
+.rail{
+  position:fixed; left:0; top:0; bottom:0; width:58px;
+  background:var(--bg-deep); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; align-items:center;
+  padding:22px 0; gap:10px; z-index:50;
+}
+.rail .port{
+  position:relative; width:30px; height:30px; border:1px solid var(--line);
+  border-radius:2px; display:flex; align-items:center; justify-content:center;
+  color:var(--ink-dimmer); text-decoration:none; font-family:'IBM Plex Mono',monospace;
+  font-size:10px; letter-spacing:0.02em; background:var(--panel);
+}
+.rail .port::before{
+  content:""; position:absolute; top:3px; right:3px; width:4px; height:4px;
+  border-radius:50%; background:var(--ink-dimmer);
+}
+.rail .port:hover, .rail .port.active{ border-color:var(--cyan); color:var(--cyan); }
+.rail .port:hover::before, .rail .port.active::before{ background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+.rail .port .tip{
+  position:absolute; left:44px; top:50%; transform:translateY(-50%);
+  background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
+  font-size:11px; padding:5px 9px; border-radius:2px; white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity .15s ease; font-family:'IBM Plex Mono',monospace;
+}
+.rail .port:hover .tip{ opacity:1; }
+.rail .rack-line{ flex:1; width:1px; background:var(--line); margin:4px 0; }
+
+main{ margin-left:58px; max-width:900px; padding:0 44px 90px; }
+
+/* ---------- typography ---------- */
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--cyan);
+  letter-spacing:0.08em; margin:0 0 10px;
+}
+h1{
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:38px;
+  margin:0 0 10px; letter-spacing:-0.01em; color:var(--ink);
+}
+h2{
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:19px;
+  color:var(--ink); margin:0 0 4px;
+}
+.section-tag{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-dim);
+  margin:0 0 28px; display:flex; align-items:center; gap:10px;
+}
+.section-tag .n{ color:var(--cyan); }
+.section-tag::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+section{ padding:80px 0 10px; border-top:1px solid var(--line); }
+section:first-of-type{ border-top:none; }
+
+/* ---------- hero / boot terminal ---------- */
+.hero{ padding:64px 0 60px; border-top:none; }
+.term{
+  background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  overflow:hidden; margin-bottom:34px; box-shadow:0 20px 50px -25px rgba(0,0,0,.6);
+}
+.term-bar{
+  display:flex; align-items:center; gap:8px; padding:9px 12px;
+  background:var(--panel-2); border-bottom:1px solid var(--line);
+}
+.term-bar .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+.term-bar .dot.red{ background:#E85B5B; } .term-bar .dot.amber{ background:#FFB454; } .term-bar .dot.green{ background:#48D8C7; }
+.term-bar .term-title{ margin-left:8px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-dimmer); }
+.term-body{
+  margin:0; padding:18px 20px 22px; font-family:'IBM Plex Mono',monospace;
+  font-size:13px; line-height:1.85; color:var(--ink-dim); white-space:pre-wrap; min-height:168px;
+}
+.term-body .ok{ color:var(--cyan); }
+.term-body .k{ color:var(--ink); }
+.term-body .cursor{ display:inline-block; width:7px; height:14px; background:var(--cyan); vertical-align:middle; margin-left:2px; animation:blink 1s step-end infinite; }
+@keyframes blink{ 50%{ opacity:0; } }
+
+.hero-sub{ font-size:17px; color:var(--ink-dim); max-width:580px; margin:0 0 24px; }
+.hero-meta{
+  display:flex; gap:10px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:12px;
+}
+.hero-meta span{
+  color:var(--ink-dim); border:1px solid var(--line); background:var(--panel);
+  padding:5px 10px; border-radius:2px;
+}
+.hero-meta span b{ color:var(--cyan); font-weight:500; }
+
+.prose{ max-width:640px; color:var(--ink-dim); font-size:15px; }
+.prose b{ color:var(--ink); font-weight:500; }
+
+/* ---------- skills ---------- */
+.patch-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin-top:20px; }
+.patch{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:15px 17px; border-left:2px solid var(--line);
+}
+.patch .cat{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--cyan); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; display:block; }
+.patch ul{ list-style:none; margin:0; padding:0; font-size:13.5px; color:var(--ink); }
+.patch li{ padding:2px 0; }
+.patch li::before{ content:"› "; color:var(--ink-dimmer); }
+
+/* ---------- experience timeline ---------- */
+.timeline-item{ display:grid; grid-template-columns:150px 1fr; gap:24px; padding:24px 0; border-top:1px solid var(--line); }
+.timeline-item:first-child{ border-top:none; }
+.t-date{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-dimmer); padding-top:3px; }
+.t-role{ font-weight:600; font-size:15.5px; margin:0 0 3px; color:var(--ink); }
+.t-org{ color:var(--cyan); font-size:12.5px; margin:0 0 10px; font-family:'IBM Plex Mono',monospace; }
+.t-role-group ul{ margin:0; padding-left:18px; color:var(--ink-dim); font-size:13.5px; }
+.t-role-group li{ margin-bottom:4px; }
+
+/* ---------- project cards as "service status" panels ---------- */
+.card-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px; }
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:0; position:relative; overflow:hidden;
+}
+.card-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:11px 16px; background:var(--panel-2); border-bottom:1px solid var(--line);
+  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-dimmer);
+}
+.card-head .host{ color:var(--ink-dim); }
+.card-status{ display:flex; align-items:center; gap:6px; }
+.card-status .dot{ width:7px; height:7px; border-radius:50%; background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+.card-status.group .dot{ background:var(--amber); box-shadow:0 0 6px var(--amber); }
+.card-status .label{ text-transform:uppercase; letter-spacing:0.04em; }
+.card-body{ padding:16px 18px 18px; }
+.card h3{ font-size:15.5px; margin:0 0 8px; font-weight:600; color:var(--ink); }
+.card p.desc{ font-size:13px; color:var(--ink-dim); margin:0; }
+
+.card summary{ cursor:pointer; color:var(--cyan); font-family:'IBM Plex Mono',monospace; font-size:11.5px; list-style:none; margin-top:14px; }
+.card summary::-webkit-details-marker{ display:none; }
+.card summary::before{ content:"[+] détails"; }
+.card details[open] summary::before{ content:"[-] masquer"; }
+.card .detail-body{ margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); }
+.card .detail-body h4{ font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-dimmer); font-family:'IBM Plex Mono',monospace; margin:0 0 8px; }
+.card .detail-body ul{ margin:0 0 14px; padding-left:18px; font-size:13px; color:var(--ink-dim); }
+.card .detail-body li{ margin-bottom:4px; }
+.card .resources{ display:flex; gap:8px; flex-wrap:wrap; }
+.card .resources a{
+  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-dim);
+  border:1px solid var(--line); border-radius:2px; padding:6px 11px; text-decoration:none;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.card .resources a::before{ content:"↓"; color:var(--ink-dimmer); }
+.card .resources a:hover{ border-color:var(--cyan); color:var(--cyan); }
+.card .resources a:hover::before{ color:var(--cyan); }
+.card-body a.shot-link{ display:block; margin:0 0 12px; border:1px solid var(--line); border-radius:2px; overflow:hidden; }
+.card-body img.shot{ display:block; width:100%; height:auto; filter:saturate(.9); transition:filter .2s ease; }
+.card-body a.shot-link:hover img.shot{ filter:saturate(1); }
+
+/* ---------- veille ---------- */
+.veille-article{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; margin-top:20px; }
+.veille-article .tag{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--amber); border:1px solid var(--amber); border-radius:2px; padding:2px 9px; display:inline-block; margin-bottom:14px; }
+.veille-article h3{ font-size:17px; margin:0 0 12px; color:var(--ink); }
+.veille-article p{ font-size:14px; color:var(--ink-dim); margin:0 0 12px; }
+.veille-article h4{ font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink); font-family:'IBM Plex Mono',monospace; margin:18px 0 8px; }
+.veille-article ul{ margin:0 0 12px; padding-left:18px; font-size:14px; color:var(--ink-dim); }
+.veille-article li{ margin-bottom:5px; }
+.avis{ border-left:2px solid var(--cyan); padding-left:14px; margin-top:16px; font-size:13.5px; color:var(--ink); }
+
+/* ---------- certifications ---------- */
+.cert-list{ display:flex; flex-direction:column; gap:9px; margin-top:20px; }
+.cert-row{
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:13px 17px; font-size:13.5px; font-family:'IBM Plex Mono',monospace;
+}
+.cert-row .status{ font-size:11px; padding:3px 10px; border-radius:2px; text-transform:uppercase; letter-spacing:0.03em; }
+.status.done{ color:var(--cyan); border:1px solid var(--cyan); }
+.status.pending{ color:var(--amber); border:1px solid var(--amber); }
+
+/* ---------- contact ---------- */
+.contact-block{ display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+.contact-block a{
+  font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink);
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:10px 16px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+}
+.contact-block a::before{ content:"›"; color:var(--cyan); }
+.contact-block a:hover{ border-color:var(--cyan); color:var(--cyan); }
+.contact-block a.cta{
+  background:var(--cyan); border-color:var(--cyan); color:var(--bg-deep); font-weight:600;
+}
+.contact-block a.cta::before{ color:var(--bg-deep); }
+.contact-block a.cta:hover{ background:transparent; color:var(--cyan); }
+
+footer{ margin-top:56px; padding:20px 0 0; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-dimmer); font-family:'IBM Plex Mono',monospace; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+@media (max-width:720px){
+  .rail{ display:none; }
+  main{ margin-left:0; padding:0 20px 60px; }
+  .card-grid{ grid-template-columns:1fr; }
+  .timeline-item{ grid-template-columns:1fr; gap:6px; }
+  h1{ font-size:28px; }
+}
+
+/* ---------- cascade reveal ---------- */
+.reveal{
+  opacity:0; transform:translateY(20px);
+  transition:opacity .6s cubic-bezier(.16,.8,.3,1), transform .6s cubic-bezier(.16,.8,.3,1);
+}
+.reveal.is-visible{ opacity:1; transform:none; }
+@media (prefers-reduced-motion: reduce){
+  .reveal{ opacity:1; transform:none; transition:none; }
+  .term-body .cursor{ animation:none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="rail">
+  <a class="port" href="#profil"><span>01</span><span class="tip">profil</span></a>
+  <a class="port" href="#competences"><span>02</span><span class="tip">compétences</span></a>
+  <a class="port" href="#experience"><span>03</span><span class="tip">expérience</span></a>
+  <a class="port" href="#projets"><span>04</span><span class="tip">projets</span></a>
+  <div class="rack-line"></div>
+  <a class="port" href="#veille"><span>05</span><span class="tip">veille</span></a>
+  <a class="port" href="#certifications"><span>06</span><span class="tip">certifs</span></a>
+  <a class="port" href="#contact"><span>07</span><span class="tip">contact</span></a>
+</nav>
+
+<main>
+
+  <section class="hero reveal" id="profil">
+    <p class="eyebrow">// rafiq@infra ~ status report</p>
+
+    <div class="term">
+      <div class="term-bar">
+        <span class="dot red"></span><span class="dot amber"></span><span class="dot green"></span>
+        <span class="term-title">rafiq@infra:~$</span>
+      </div>
+      <pre class="term-body" id="bootLog" data-src="$ whoami
+rafiq.thomas — administrateur systèmes &amp; réseaux
+
+$ cat statut.conf
+[ OK ] Bachelor Administrateur d'Infrastructures Sécurisées — Institut F2I
+[ OK ] BTS SIO option SISR — obtenu 2025
+[ OK ] Base : Neuilly-sur-Marne (93)
+[ .. ] Recherche alternance — Île-de-France — DISPONIBLE"></pre>
+    </div>
+
+    <h1>Rafiq Thomas</h1>
+    <p class="hero-sub">Administrateur systèmes &amp; réseaux en formation — je construis, sécurise et supervise des infrastructures, et je cherche une alternance en Île-de-France pour le faire en conditions réelles.</p>
+    <div class="hero-meta">
+      <span><b>AD</b> · GLPI · SIEM</span>
+      <span><b>Azure</b> · Proxmox</span>
+      <span><b>Réseau</b> · Fortinet</span>
+    </div>
+  </section>
+
+  <section id="a-propos" class="reveal">
+    <p class="section-tag"><span class="n">01</span> à propos</p>
+    <p class="prose">
+      Étudiant en <b>Bachelor Administrateur d'Infrastructures Sécurisées</b>, après un BTS SIO option SISR, j'ai construit mes bases autant en labo qu'en stage : contrôleur de domaine Active Directory, SIEM QRadar, GLPI, supervision Zabbix, VPN site-à-site, virtualisation Proxmox et administration Azure. Ce qui m'intéresse, c'est faire tourner une infra proprement — documentée, supervisée, sécurisée — pas juste la faire fonctionner une fois.
+    </p>
+    <p class="prose" style="margin-top:14px;">
+      Je cherche une alternance où je peux apprendre au contact d'une vraie équipe infra, sur des environnements Windows/Linux mixtes.
+    </p>
+  </section>
+
+  <section id="competences" class="reveal">
+    <p class="section-tag"><span class="n">02</span> compétences</p>
+    <h2>Stack technique</h2>
+    <div class="patch-grid">
+      <div class="patch"><span class="cat">Systèmes</span><ul><li>Windows Server</li><li>Linux Debian</li><li>Active Directory / GPO</li></ul></div>
+      <div class="patch"><span class="cat">Réseaux</span><ul><li>VLAN</li><li>DNS / DHCP</li><li>VPN IPsec</li></ul></div>
+      <div class="patch"><span class="cat">Virtualisation</span><ul><li>Proxmox</li><li>Hyper-V</li><li>Docker</li></ul></div>
+      <div class="patch"><span class="cat">Supervision &amp; SIEM</span><ul><li>Zabbix</li><li>Centreon / OCS</li><li>IBM QRadar</li></ul></div>
+      <div class="patch"><span class="cat">ITSM</span><ul><li>GLPI (LAMP)</li><li>Agent GLPI</li><li>Synchro LDAP</li></ul></div>
+      <div class="patch"><span class="cat">Cybersécurité</span><ul><li>Fortinet</li><li>Wireshark</li><li>Metasploit</li></ul></div>
+      <div class="patch"><span class="cat">Cloud</span><ul><li>Azure</li><li>Google Cloud</li></ul></div>
+    </div>
+  </section>
+
+  <section id="experience" class="reveal">
+    <p class="section-tag"><span class="n">03</span> expérience</p>
+    <div class="timeline-item reveal">
+      <div class="t-date">Déc 2024 → Mars 2025</div>
+      <div class="t-role-group">
+        <p class="t-role">Technicien Support IT</p>
+        <p class="t-org">IEF2I — Paris</p>
+        <ul>
+          <li>Support utilisateurs à distance et sur site</li>
+          <li>Gestion des comptes et droits d'accès sous Active Directory</li>
+          <li>Dépannage réseau LAN / Wi-Fi</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="t-date">Oct 2021 → Déc 2021</div>
+      <div class="t-role-group">
+        <p class="t-role">Technicien Maintenance Informatique</p>
+        <p class="t-org">Orabank — Niamey</p>
+        <ul>
+          <li>Installation et maintenance du parc informatique</li>
+          <li>Suivi des sauvegardes et licences logicielles</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="projets" class="reveal">
+    <p class="section-tag"><span class="n">04</span> projets techniques</p>
+    <div class="card-grid">
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">srv-adds.rafiq.local</span>
+          <span class="card-status"><span class="dot"></span><span class="label">déployé</span></span>
+        </div>
+        <div class="card-body">
+          <h3>Contrôleur de domaine Active Directory</h3>
+          <p class="desc">Déploiement solo d'un contrôleur de domaine Windows Server 2022 sous Proxmox, avec arborescence AD complète.</p>
+          <a class="shot-link" href="img/adds.png" target="_blank"><img class="shot" src="img/adds.png" alt="Console Proxmox / Active Directory Users and Computers"></a>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>Création de la VM sous Proxmox VE (4 Go RAM, 2 vCPU) et installation de Windows Server 2022</li>
+                <li>IP fixe, renommage du serveur, installation du rôle ADDS et promotion en contrôleur de domaine (niveau fonctionnel 2016, DNS auto)</li>
+                <li>Création des OU (Utilisateurs, Services, Informatique, Stagiaires), utilisateurs et groupes</li>
+                <li>Intégration d'un poste client Windows 10 au domaine et test de connexion</li>
+              </ul>
+              <h4>Résultat</h4>
+              <ul><li>Environnement AD fonctionnel et reproductible : les postes rejoignent le domaine et reçoivent les GPO</li></ul>
+              <div class="resources">
+                <a href="docs/tp_ADDS.pdf" target="_blank">rapport complet</a>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">qradar-01.lab</span>
+          <span class="card-status group"><span class="dot"></span><span class="label">projet groupe</span></span>
+        </div>
+        <div class="card-body">
+          <h3>SIEM IBM QRadar — collecte multi-sources</h3>
+          <p class="desc">Déploiement d'un SIEM QRadar et intégration des logs de trois équipements hétérogènes du réseau.</p>
+          <a class="shot-link" href="img/qradar.png" target="_blank"><img class="shot" src="img/qradar.png" alt="Console IBM QRadar"></a>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>Installation de l'appliance IBM QRadar 7.5 (RHEL) sur une VM Proxmox</li>
+                <li>Vérification des événements d'authentification AD (ID 4624, 4625, 4672)</li>
+                <li>Intégration Windows via NXLog + GPO d'audit de sécurité</li>
+                <li>Intégration Debian via rsyslog, intégration pfSense via Syslog RFC 5424</li>
+              </ul>
+              <h4>Mon rôle</h4>
+              <p style="font-size:13px;color:var(--ink-dim);margin:0 0 10px;">Installation complète de l'appliance QRadar, configuration de NXLog (Windows) et de rsyslog (Debian).</p>
+              <h4>Résultat</h4>
+              <ul><li>Centralisation des logs de sécurité de 3 sources hétérogènes vers un point unique de corrélation</li></ul>
+              <div class="resources">
+                <a href="docs/Compte_Rendu_QRadar_1.pdf" target="_blank">rapport complet</a>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">srv-glpi.rafiq.local</span>
+          <span class="card-status"><span class="dot"></span><span class="label">déployé</span></span>
+        </div>
+        <div class="card-body">
+          <h3>Déploiement GLPI (LAMP + agent)</h3>
+          <p class="desc">Installation d'un serveur GLPI 10 sur Debian 12, puis déploiement de l'agent d'inventaire sur des postes Windows.</p>
+          <a class="shot-link" href="img/glpi.png" target="_blank"><img class="shot" src="img/glpi.png" alt="Interface GLPI"></a>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>Socle LAMP sous Debian 12 (Apache2, MariaDB, PHP + extensions requises)</li>
+                <li>Sécurisation de MariaDB, base et utilisateur dédié avec droits restreints</li>
+                <li>Déploiement de GLPI, permissions www-data, suppression du dossier <code>install/</code> en prod</li>
+                <li>Déploiement de l'agent GLPI v1.5 (.msi) sur postes Windows, pointé vers le serveur</li>
+              </ul>
+              <h4>Résultat</h4>
+              <ul><li>Inventaire automatique (OS, modèle, fabricant, processeur) sans action manuelle</li></ul>
+              <div class="resources">
+                <a href="docs/Installation_GLPI.pdf" target="_blank">install serveur</a>
+                <a href="docs/installation_agent_glpi.pdf" target="_blank">install agent</a>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">glpi-ldap.rafiq.local</span>
+          <span class="card-status"><span class="dot"></span><span class="label">déployé</span></span>
+        </div>
+        <div class="card-body">
+          <h3>Synchronisation LDAP ↔ GLPI</h3>
+          <p class="desc">Connexion de GLPI à un annuaire Active Directory pour automatiser l'import des comptes utilisateurs.</p>
+          <a class="shot-link" href="img/ldap.png" target="_blank"><img class="shot" src="img/ldap.png" alt="Configuration de l'annuaire LDAP dans GLPI"></a>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>Ajout d'un annuaire LDAP dans GLPI (Configuration &gt; Authentification &gt; LDAP directories)</li>
+                <li>Paramétrage : serveur, BaseDN, DN de connexion, filtre <code>(sAMAccountName=%u)</code></li>
+                <li>Test de connexion puis import sélectif via Utilisateurs &gt; LDAP Directory</li>
+                <li>Vérification que les comptes s'authentifient avec leurs identifiants AD</li>
+              </ul>
+              <h4>Résultat</h4>
+              <ul><li>Gestion des comptes unifiée entre AD et GLPI, sans ressaisie manuelle</li></ul>
+              <div class="resources">
+                <a href="docs/tp_synchro_ldap.pdf" target="_blank">rapport complet</a>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">azure/rg-lab</span>
+          <span class="card-status"><span class="dot"></span><span class="label">déployé</span></span>
+        </div>
+        <div class="card-body">
+          <h3>Administration Microsoft Azure</h3>
+          <p class="desc">7 ateliers couvrant la mise en réseau, la sécurité, le stockage et le chiffrement sur Azure.</p>
+          <a class="shot-link" href="img/azure.png" target="_blank"><img class="shot" src="img/azure.png" alt="Console Microsoft Azure"></a>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>VNet et déploiement de VMs sur 3 méthodes : portail, PowerShell, Azure CLI</li>
+                <li>Interfaces réseau supplémentaires et IP publiques statiques</li>
+                <li>Peering entre VNets et filtrage via groupes de sécurité réseau (NSG)</li>
+                <li>Stockage de fichiers et Blob Azure, chiffrement de disques de VM</li>
+              </ul>
+              <h4>Résultat</h4>
+              <ul><li>Maîtrise des briques réseau/sécurité/stockage de base sur Azure, sur plusieurs méthodes de déploiement</li></ul>
+              <div class="resources">
+                <a href="docs/TP_Azure_Compte_Rendu.pdf" target="_blank">rapport complet</a>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">fw-fgt.rafiq.local</span>
+          <span class="card-status"><span class="dot"></span><span class="label">déployé</span></span>
+        </div>
+        <div class="card-body">
+          <h3>VPN site-à-site — IPsec sur FortiGate</h3>
+          <p class="desc">Interconnexion sécurisée de deux sites via un tunnel IPsec entre deux pare-feux Fortinet FortiGate.</p>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>Création du tunnel IPsec via l'assistant VPN de FortiOS (phases IKE 1 et 2)</li>
+                <li>Réseaux locaux à chiffrer et politiques de pare-feu autorisant le trafic inter-sites</li>
+                <li>Tests de connectivité et vérification du chiffrement du tunnel</li>
+              </ul>
+              <h4>Résultat</h4>
+              <ul><li>Deux sites distants communiquent comme sur un même réseau local, de façon chiffrée</li></ul>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">zbx-01.rafiq.local</span>
+          <span class="card-status"><span class="dot"></span><span class="label">déployé</span></span>
+        </div>
+        <div class="card-body">
+          <h3>Supervision Zabbix</h3>
+          <p class="desc">Déploiement d'une stack de supervision Linux avec alerting sur services critiques.</p>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>Serveur Zabbix sous Linux et déploiement des agents sur les machines surveillées</li>
+                <li>Templates de supervision (CPU, RAM, disque, services)</li>
+                <li>Alertes déclenchées en cas de dépassement de seuils</li>
+              </ul>
+              <h4>Résultat</h4>
+              <ul><li>Détection proactive d'incidents avant qu'ils n'impactent les utilisateurs</li></ul>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head">
+          <span class="host">backup-svc.rafiq.local</span>
+          <span class="card-status"><span class="dot"></span><span class="label">déployé</span></span>
+        </div>
+        <div class="card-body">
+          <h3>Sauvegarde automatisée — contrôleur de domaine</h3>
+          <p class="desc">Sauvegarde quotidienne automatisée d'un contrôleur de domaine Windows vers un serveur Debian.</p>
+          <details>
+            <summary></summary>
+            <div class="detail-body">
+              <h4>Ce qui a été fait</h4>
+              <ul>
+                <li>Tâche planifiée pour exécuter la sauvegarde du contrôleur de domaine à horaire fixe</li>
+                <li>Transfert automatisé vers un serveur Debian distant via le réseau</li>
+                <li>Vérification de l'intégrité et de la restauration possible des sauvegardes</li>
+              </ul>
+              <h4>Résultat</h4>
+              <ul><li>Reprise d'activité possible en cas de panne du contrôleur de domaine</li></ul>
+            </div>
+          </details>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="veille" class="reveal">
+    <p class="section-tag"><span class="n">05</span> veille technologique</p>
+    <p class="prose" style="margin-bottom:6px;">Un sujet sécurité que je suis actuellement de près — cette section s'enrichira au fil de mes lectures et labs.</p>
+
+    <div class="veille-article reveal">
+      <span class="tag">sécurité</span>
+      <h3>L'authentification multifacteur (MFA) : où en est-on ?</h3>
+      <p>La MFA impose au moins deux preuves d'identité parmi trois familles : ce que l'on sait (mot de passe, code PIN), ce que l'on possède (téléphone, clé physique) et ce que l'on est (empreinte, reconnaissance faciale). Elle est devenue quasi obligatoire face à la généralisation des fuites d'identifiants et des attaques de phishing.</p>
+
+      <h4>Méthodes courantes</h4>
+      <ul>
+        <li>Code à usage unique par SMS ou application (OTP / TOTP)</li>
+        <li>Notification push à valider sur smartphone</li>
+        <li>Clé de sécurité physique ou passkey (norme FIDO2/WebAuthn)</li>
+      </ul>
+
+      <h4>Une limite connue : le contournement humain</h4>
+      <p>Le SMS reste vulnérable au SIM swapping, et les notifications push ont ouvert la voie aux attaques dites de <b>MFA fatigue</b> (ou push bombing) : l'attaquant, en possession du mot de passe, déclenche de nombreuses demandes de validation jusqu'à ce que la victime finisse par accepter par lassitude ou confusion.</p>
+
+      <h4>Tendance actuelle</h4>
+      <p>Le marché évolue vers une <b>MFA résistante au phishing</b> : le "number matching" (l'utilisateur doit saisir un code affiché sur l'écran de connexion, pas juste taper sur "Accepter") et surtout la généralisation des <b>passkeys</b>, qui remplacent le mot de passe par une paire de clés cryptographiques liée à l'appareil — supprimant le risque de vol d'identifiants réutilisables.</p>
+
+      <div class="avis">
+        Mon avis technique : la MFA reste indispensable mais son efficacité dépend surtout de la méthode choisie ; le SMS est un minimum, les passkeys sont la direction vers laquelle les entreprises devraient migrer en priorité.
+      </div>
+    </div>
+
+  </section>
+
+  <section id="certifications" class="reveal">
+    <p class="section-tag"><span class="n">06</span> certifications</p>
+    <div class="cert-list">
+      <div class="cert-row reveal"><span>ANSSI — SecNumacadémie</span><span class="status done">obtenue</span></div>
+      <div class="cert-row reveal"><span>Certification réseau — Cisco</span><span class="status pending">en cours</span></div>
+      <div class="cert-row reveal"><span>Certification cyber — TryHackMe</span><span class="status pending">en cours</span></div>
+    </div>
+  </section>
+
+  <section id="contact" class="reveal">
+    <p class="section-tag"><span class="n">07</span> contact</p>
+    <p class="prose" style="font-size:15.5px;">
+      <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:12px;">[ .. ] STATUT : DISPONIBLE</span> — à la recherche d'une alternance à pourvoir dès que possible en Île-de-France. Réponse sous 24h.
+    </p>
+    <div class="contact-block">
+      <a href="mailto:thomasrafiq9@gmail.com" class="cta">M'écrire un mail</a>
+      <a href="tel:+33753487190">+33 7 53 48 71 90</a>
+      <a href="http://www.linkedin.com/in/rafiqthomas">LinkedIn</a>
+      <a href="CV_Rafiq_Thomas_2025.pdf" target="_blank">CV (PDF)</a>
+    </div>
+  </section>
+
+  <footer><span>rafiq thomas — administrateur systèmes &amp; réseaux</span><span>build: portfolio-technique</span></footer>
+
+</main>
+
+<script>
+(function(){
+  // boot log typewriter
+  var pre = document.getElementById('bootLog');
+  var full = pre.getAttribute('data-src');
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function highlight(text){
+    return text
+      .replace(/\[ OK \]/g, '<span class="ok">[ OK ]</span>')
+      .replace(/\[ \.\. \]/g, '<span class="ok">[ .. ]</span>')
+      .replace(/^(\$ .+)$/gm, '<span class="k">$1</span>');
+  }
+
+  if (reduced){
+    pre.innerHTML = highlight(full);
+  } else {
+    pre.innerHTML = '';
+    var i = 0;
+    var speed = 9;
+    function tick(){
+      if (i <= full.length){
+        pre.innerHTML = highlight(full.slice(0, i)) + '<span class="cursor"></span>';
+        i += 2;
+        setTimeout(tick, speed);
+      } else {
+        pre.innerHTML = highlight(full) + '<span class="cursor"></span>';
+      }
+    }
+    setTimeout(tick, 250);
+  }
+
+  // cascade reveal on scroll
+  var targets = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  targets.forEach(function(el){ io.observe(el); });
+
+  // scrollspy for the rail
+  var links = document.querySelectorAll('.rail a[href^="#"]');
+  var sections = Array.prototype.slice.call(links).map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  var spy = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      var id = '#' + entry.target.id;
+      var link = document.querySelector('.rail a[href="' + id + '"]');
+      if (!link) return;
+      if (entry.isIntersecting) links.forEach(function(l){ l.classList.remove('active'); });
+      if (entry.isIntersecting) link.classList.add('active');
+    });
+  }, { threshold: 0, rootMargin: '-45% 0px -45% 0px' });
+  sections.forEach(function(s){ spy.observe(s); });
+})();
+</script>
+
+</body>
+</html>
